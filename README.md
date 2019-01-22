@@ -1,5 +1,5 @@
 # bmitoolbox
-Toolbox for bmi.
+Toolbox for Brain Machine Interface.
 
 ## Installation
 ```
