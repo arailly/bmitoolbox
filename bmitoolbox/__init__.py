@@ -1,1 +1,1 @@
-from bmitoolbox.preprocess.signal import *
+from .preprocess.signal import *
