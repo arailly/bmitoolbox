@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='bmitoolbox',
     version='0.0.0',
-    packages=['bmitoolbox.preprocess'],
+    packages=['bmitoolbox', 'bmitoolbox.preprocess'],
     url='',
     license='',
     author='Yusuke ARAI',
