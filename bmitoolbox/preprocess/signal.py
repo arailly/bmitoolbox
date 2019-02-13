@@ -93,7 +93,7 @@ def biporar_diff(data, sfreq=2000, timedelta=0, normalize=True):
     return chan_diffs
 
 
-def epoching(raw, trig, time_delta=0, sfreq=2000):
+def epoching(raw, trig, size: int, offset: int = 0):
     """Synchronize raw wave to trigger data and make epochs.
 
     Params:
@@ -101,7 +101,9 @@ def epoching(raw, trig, time_delta=0, sfreq=2000):
             Brain wave array
         trig (array-like, shape(n_triggers,)):
             Triggers to synchronize raw wave to image of video.
-        time_delta (int, optional, default=0):
+        size (int):
+            Epoch size.
+        offset (int, optional, default=0):
             Time shift.
         sfreq (int, optional, default=2000):
             Sampling freqency.
@@ -113,8 +115,8 @@ def epoching(raw, trig, time_delta=0, sfreq=2000):
     """
     epochs = []
     for i, trig_idx in enumerate(trig):
-        epoch_indices = range(trig_idx + time_delta,
-                              trig_idx + sfreq + time_delta)
+        epoch_indices = range(trig_idx + offset,
+                              trig_idx + offset + size)
         epochs.append(raw[epoch_indices])
 
     return np.array(epochs)
