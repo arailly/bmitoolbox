@@ -181,8 +181,14 @@ def bandstop_filter(data, lowcut, highcut, fs=2000, numtaps=255):
     return filtered
 
 
-def var_preprocess(raw_files, trig_files, output_dir, standardize=True, augmentation=1):
-    """preprocess for video-annotation-regression"""
+def var_preprocess(raw_files, trig_files, output_dir, standardize=True, augmentate=False):
+    """preprocess for video-annotation-regression
+
+    contents of process:
+    - Get 2000 samples (1[sec] long) after trigger signal is generated.
+    - Band pass filter (1Hz ~ 150Hz)
+    - Band stop filter (59Hz ~ 61Hz) (to decrease power-line noise)
+    """
     for raw_file, trig_file in zip(tqdm_nb(raw_files), trig_files):
 
         # load brainwave
@@ -205,8 +211,19 @@ def var_preprocess(raw_files, trig_files, output_dir, standardize=True, augmenta
             for i in range(n_channels)
         ]).T
 
-        # epoching
-        epochs = bt.epoching(bandstopped, trig, size=1000)
+        if augmentate == False:
+            # epoching
+            epochs = bt.epoching(bandstopped, trig, size=1000)
+        else:
+            # epoching and augmentation
+            epochs1 = bt.epoching(bandstopped, trig, size=2000, offset=-2000)
+            epochs2 = bt.epoching(bandstopped, trig, size=2000, offset=-1500)
+            epochs3 = bt.epoching(bandstopped, trig, size=2000, offset=-1000)
+            epochs4 = bt.epoching(bandstopped, trig, size=2000, offset=-500)
+            epochs5 = bt.epoching(bandstopped, trig, size=2000, offset=0)
+
+            epochs = np.concatenate([epochs1, epochs2, epochs3,
+                                     epochs4, epochs5])
 
         # standardize
         standard_epochs = []
@@ -218,4 +235,4 @@ def var_preprocess(raw_files, trig_files, output_dir, standardize=True, augmenta
         standard_epochs = np.array(standard_epochs)
 
         filename = raw_file.split('/')[-1].split('.')[0]
-        bt.write_pickle(standard_epochs, output_dir+filename)
+        bt.write_pickle(standard_epochs, output_dir + filename)
