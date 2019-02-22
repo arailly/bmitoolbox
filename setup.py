@@ -12,7 +12,8 @@ def subpackages(root_dir):
 setup(
     name='bmitoolbox',
     version='0.0.0',
-    packages=['bmitoolbox'] + subpackages('bmitoolbox'),
+    packages=['bmitoolbox']+subpackages('bmitoolbox'),
+    install_requires=['scipy', 'numpy', 'pandas', 'h5py'],
     url='',
     license='',
     author='Yusuke ARAI',
