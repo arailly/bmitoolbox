@@ -181,7 +181,8 @@ def bandstop_filter(data, lowcut, highcut, fs=2000, numtaps=255):
     return filtered
 
 
-def var_preprocess(raw_files, trig_files, output_dir, standardize=True, augmentate=False):
+def var_preprocess(raw_files, trig_files, output_dir,
+                   brainwave_len=2000, standardize=True, augmentate=False):
     """preprocess for video-annotation-regression
 
     contents of process:
@@ -213,14 +214,14 @@ def var_preprocess(raw_files, trig_files, output_dir, standardize=True, augmenta
 
         if augmentate == False:
             # epoching
-            epochs = bt.epoching(bandstopped, trig, size=1000)
+            epochs = bt.epoching(bandstopped, trig, size=brainwave_len)
         else:
             # epoching and augmentation
-            epochs1 = bt.epoching(bandstopped, trig, size=2000, offset=-2000)
-            epochs2 = bt.epoching(bandstopped, trig, size=2000, offset=-1500)
-            epochs3 = bt.epoching(bandstopped, trig, size=2000, offset=-1000)
-            epochs4 = bt.epoching(bandstopped, trig, size=2000, offset=-500)
-            epochs5 = bt.epoching(bandstopped, trig, size=2000, offset=0)
+            epochs1 = bt.epoching(bandstopped, trig, size=brainwave_len, offset=-2000)
+            epochs2 = bt.epoching(bandstopped, trig, size=brainwave_len, offset=-1500)
+            epochs3 = bt.epoching(bandstopped, trig, size=brainwave_len, offset=-1000)
+            epochs4 = bt.epoching(bandstopped, trig, size=brainwave_len, offset=-500)
+            epochs5 = bt.epoching(bandstopped, trig, size=brainwave_len, offset=0)
 
             epochs = np.concatenate([epochs1, epochs2, epochs3,
                                      epochs4, epochs5])
