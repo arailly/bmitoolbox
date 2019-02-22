@@ -217,7 +217,5 @@ def var_preprocess(raw_files, trig_files, output_dir, standardize=True, augmenta
 
         standard_epochs = np.array(standard_epochs)
 
-        print(standard_epochs.shape)
-
         filename = raw_file.split('/')[-1].split('.')[0]
         bt.write_pickle(standard_epochs, output_dir+filename)
