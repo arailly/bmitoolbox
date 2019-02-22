@@ -1,5 +1,12 @@
 import numpy as np
 from scipy.signal import butter, lfilter, firwin
+import os, h5py, glob
+import bmitoolbox as bt
+import numpy as np
+from scipy.io import loadmat
+from scipy import signal
+
+from tqdm import tqdm_notebook as tqdm_nb
 
 
 def z_score(x, axis=0):
@@ -93,7 +100,7 @@ def biporar_diff(data, sfreq=2000, timedelta=0, normalize=True):
     return chan_diffs
 
 
-def epoching(raw, trig, size: int, offset: int = 0):
+def epoching(raw, trig, size: int, offset: int = 0, standardize: bool = False):
     """Synchronize raw wave to trigger data and make epochs.
 
     Params:
@@ -107,6 +114,8 @@ def epoching(raw, trig, size: int, offset: int = 0):
             Time shift.
         sfreq (int, optional, default=2000):
             Sampling freqency.
+        standardize (bool):
+            True if you want to standardize data
 
     Returns:
         epochs (numpy.array, shape(n_epochs, n_samples, n_channels)):
@@ -170,3 +179,45 @@ def bandstop_filter(data, lowcut, highcut, fs=2000, numtaps=255):
     filtered = lfilter(b, 1, data)
 
     return filtered
+
+
+def var_preprocess(raw_files, trig_files, output_dir, standardize=True, augmentation=1):
+    """preprocess for video-annotation-regression"""
+    for raw_file, trig_file in zip(tqdm_nb(raw_files), trig_files):
+
+        # load brainwave
+        raw = np.array(h5py.File(raw_file, 'r')['ecog_dat'])
+        n_channels = raw.shape[-1]
+
+        # load trigger
+        trig = loadmat(trig_file)['trigger_index'][0]
+
+        # filter
+        # pass 1 - 150Hz
+        bandpassed = np.array([
+            bt.bandpass_filter(raw[:, i], 1, 150)
+            for i in range(n_channels)
+        ]).T
+
+        # eliminate 59 - 61Hz
+        bandstopped = np.array([
+            bt.bandstop_filter(bandpassed[:, i], 59, 61)
+            for i in range(n_channels)
+        ]).T
+
+        # epoching
+        epochs = bt.epoching(bandstopped, trig, size=1000)
+
+        # standardize
+        standard_epochs = []
+
+        for epoch in epochs:
+            standard_samples = [bt.z_score(epoch[:, i]) for i in range(n_channels)]
+            standard_epochs.append(np.array(standard_samples).T)
+
+        standard_epochs = np.array(standard_epochs)
+
+        print(standard_epochs.shape)
+
+        filename = raw_file.split('/')[-1].split('.')[0]
+        bt.write_pickle(standard_epochs, output_dir+filename)
