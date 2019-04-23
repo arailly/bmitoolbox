@@ -188,7 +188,7 @@ def var_preprocess(raw_files, trig_files, output_dir,
     - Band pass filter (1Hz ~ 150Hz)
     - Band stop filter (59Hz ~ 61Hz) (to decrease power-line noise)
     """
-    for raw_file, trig_file in raw_files, trig_files:
+    for raw_file, trig_file in zip(raw_files, trig_files):
 
         # load brainwave
         raw = np.array(h5py.File(raw_file, 'r')['ecog_dat'])
