@@ -212,7 +212,7 @@ def var_preprocess(raw_files, trig_files, output_dir,
 
         if augmentate == False:
             # epoching
-            epochs = bt.epoching(bandstopped, trig, size=brainwave_len)
+            epochs = bt.epoching(bandstopped, trig, size=brainwave_len, offset=-1000)
         else:
             # epoching and augmentation
             epochs1 = bt.epoching(bandstopped, trig, size=brainwave_len, offset=-2000)
